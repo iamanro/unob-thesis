@@ -1,0 +1,9 @@
+[Unit]
+Description=NFS pool automount
+
+[Automount]
+Where=/mnt/storage
+TimeoutIdleSec=600
+
+[Install]
+WantedBy=multi-user.target

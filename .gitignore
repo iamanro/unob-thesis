@@ -1,0 +1,21 @@
+# Výstupy kompilace
+build/
+*.pdf
+
+# Editory a nástroje
+.DS_Store
+.vscode/
+.idea/
+.zed/
+*.swp
+*.swo
+
+# go-task cache
+.task/
+
+# Python venv (pyrunner)
+.venv/
+__pycache__/
+
+# Lokální zdrojové podklady (nepatří do repozitáře)
+zdroje.txt

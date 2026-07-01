@@ -1,0 +1,33 @@
+[package]
+name = "unob-thesis"
+version = "0.2.0"
+entrypoint = "lib.typ"
+authors = ["Univerzita obrany"]
+license = "MIT"
+description = "Šablona závěrečných prací pro Univerzitu obrany"
+categories = ["thesis"]
+compiler = "0.15.0"
+repository = "https://github.com/iamanro/unob-thesis"
+disciplines = ["political-science", "economics", "law", "sociology", "security-studies"]
+languages = ["cs", "en"]
+exclude = [
+  # Vývojový vzorek (uživatel dostane template/main.typ)
+  "main.typ",
+  # Vývojové nástroje a konfigurace
+  "Taskfile.yml",
+  ".tinymist.toml",
+  ".github",
+  ".task",
+  ".zed",
+  # CI a testy
+  "tests",
+  "scripts",
+  # Výstupy a dočasné soubory
+  "build",
+  "*.pdf",
+]
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "thumbnail.png"

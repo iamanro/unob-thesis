@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Typst
+        uses: typst-community/setup-typst@v4
+        with:
+          typst-version: latest
+
+      # Aby šel v template/main.typ přeložit import @preview/unob-thesis:0.2.0
+      - name: Link package for the template import
+        run: |
+          pkg="$HOME/.local/share/typst/packages/preview/unob-thesis/0.2.0"
+          mkdir -p "$(dirname "$pkg")"
+          ln -s "$GITHUB_WORKSPACE" "$pkg"
+
+      # Vysázený náhled — uživatel vidí výsledek bez instalace čehokoli
+      - name: Compile preview PDF
+        run: typst compile --root . --font-path template/fonts template/main.typ unob-thesis-preview.pdf
+
+      # Čistý balíček == co jde na Typst Universe (respektuje .gitattributes export-ignore).
+      # Název `-package-` ho odlišuje od „Code ▸ Download ZIP" (celý repozitář s main.typ).
+      - name: Build clean package archives
+        run: |
+          ver="${GITHUB_REF_NAME#v}"
+          prefix="unob-thesis-${ver}/"
+          git archive --format=zip --prefix="$prefix" -o "unob-thesis-package-${ver}.zip" HEAD
+          git archive --format=tar --prefix="$prefix" HEAD | gzip -9 > "unob-thesis-package-${ver}.tar.gz"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            unob-thesis-package-*.zip
+            unob-thesis-package-*.tar.gz
+            unob-thesis-preview.pdf
