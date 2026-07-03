@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compile:
+    name: Compile samples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Typst
+        uses: typst-community/setup-typst@v4
+        with:
+          typst-version: latest
+
+      - name: Make the package resolvable for the template's @preview import
+        run: |
+          pkg="$HOME/.local/share/typst/packages/preview/unob-thesis/0.2.0"
+          mkdir -p "$(dirname "$pkg")"
+          ln -s "$GITHUB_WORKSPACE" "$pkg"
+
+      - name: Compile development sample (main.typ)
+        run: typst compile --root . --font-path template/fonts main.typ main.pdf
+
+      - name: Compile distributed template (template/main.typ)
+        run: typst compile --root . --font-path template/fonts template/main.typ template.pdf

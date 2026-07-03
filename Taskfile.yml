@@ -1,0 +1,70 @@
+# https://taskfile.dev — task build system for UNOB thesis template
+version: "3"
+
+vars:
+  PROJECT_DIR: '{{.TASKFILE_DIR}}'
+  ROOT: '{{.TASKFILE_DIR}}'
+  FONT_PATH: '{{.TASKFILE_DIR}}/template/fonts'
+  INPUT: '{{.TASKFILE_DIR}}/main.typ'
+  OUTPUT: '{{.TASKFILE_DIR}}/build/thesis.pdf'
+  DRAFT_OUTPUT: '{{.TASKFILE_DIR}}/build/draft.pdf'
+
+tasks:
+  default:
+    desc: "Compile thesis (default)"
+    cmds:
+      - task: build
+
+  build:
+    desc: "Compile thesis (final output)"
+    cmds:
+      - mkdir -p '{{.PROJECT_DIR}}/build'
+      - typst compile --root={{.ROOT}} --font-path={{.FONT_PATH}} {{.INPUT}} {{.OUTPUT}}
+    sources:
+      - '{{.PROJECT_DIR}}/template/main.typ'
+      - '{{.PROJECT_DIR}}/src/**/*.typ'
+      - '{{.PROJECT_DIR}}/template/**/*'
+    generates:
+      - '{{.OUTPUT}}'
+
+  watch:
+    desc: "Watch for changes and recompile"
+    cmds:
+      - typst watch --root={{.ROOT}} --font-path={{.FONT_PATH}} {{.INPUT}} {{.OUTPUT}}
+
+  draft:
+    desc: "Compile in draft mode (faster, wider margins)"
+    cmds:
+      - mkdir -p '{{.PROJECT_DIR}}/build'
+      - typst compile --root={{.ROOT}} --font-path={{.FONT_PATH}} {{.INPUT}} {{.DRAFT_OUTPUT}}
+    sources:
+      - '{{.PROJECT_DIR}}/template/main.typ'
+      - '{{.PROJECT_DIR}}/src/**/*.typ'
+      - '{{.PROJECT_DIR}}/template/**/*'
+    generates:
+      - '{{.DRAFT_OUTPUT}}'
+
+  fonts:
+    desc: "List available fonts"
+    cmds:
+      - typst fonts --font-path={{.FONT_PATH}}
+
+  preview:
+    desc: "Build + open in zathura PDF viewer"
+    deps:
+      - build
+    cmds:
+      - 'zathura {{.OUTPUT}} > /dev/null 2>&1 &'
+
+  watch-preview:
+    desc: "Watch and auto-refresh in zathura"
+    deps:
+      - build
+    cmds:
+      - 'zathura {{.OUTPUT}} > /dev/null 2>&1 &'
+      - typst watch --root={{.ROOT}} --font-path={{.FONT_PATH}} {{.INPUT}} {{.OUTPUT}}
+
+  clean:
+    desc: "Remove build artifacts"
+    cmds:
+      - rm -rf '{{.PROJECT_DIR}}/build/'

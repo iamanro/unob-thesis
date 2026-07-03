@@ -1,0 +1,15 @@
+# Ať `git archive` (release workflow) vyprodukuje přesně to, co jde na Typst
+# Universe. Zrcadlí `exclude` v typst.toml. Vzory jsou zakotvené vedoucím `/`,
+# aby se NEsmazal template/main.typ (entrypoint) ani template/.gitignore.
+/main.typ        export-ignore
+/Taskfile.yml    export-ignore
+/.tinymist.toml  export-ignore
+/.gitignore      export-ignore
+/.gitattributes  export-ignore
+/.github         export-ignore
+/.task           export-ignore
+/.zed            export-ignore
+/tests           export-ignore
+/scripts         export-ignore
+/build           export-ignore
+*.pdf            export-ignore
