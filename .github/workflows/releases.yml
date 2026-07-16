@@ -18,10 +18,10 @@ jobs:
         with:
           typst-version: latest
 
-      # Aby šel v template/main.typ přeložit import @preview/unob-thesis:0.2.0
+      # Aby šel v template/main.typ přeložit import @preview/unob-thesis:0.3.0
       - name: Link package for the template import
         run: |
-          pkg="$HOME/.local/share/typst/packages/preview/unob-thesis/0.2.0"
+          pkg="$HOME/.local/share/typst/packages/preview/unob-thesis/0.3.0"
           mkdir -p "$(dirname "$pkg")"
           ln -s "$GITHUB_WORKSPACE" "$pkg"
 

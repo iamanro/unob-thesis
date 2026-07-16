@@ -15,8 +15,10 @@
   }
 }
 
+// Přípustné hodnoty strany zadání: `none` (placeholder), `false` (strana se
+// vůbec nevykreslí) nebo `content` (vlastní obsah zadání).
 #let validate-assignment-page(value) = {
-  if value != none and type(value) != content {
+  if value != none and value != false and type(value) != content {
     panic-i18n("error_assignment_content")
   }
 }

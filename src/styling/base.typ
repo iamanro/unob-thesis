@@ -1,5 +1,6 @@
 #import "packages.typ": apply-vlna, codly, codly-init, codly-languages
 #import "helpers.typ": centered-page-footer
+#import "../config.typ": cfg
 
 /// Nastaví globální sazbu dokumentu (text, stránka, rovnice, odkazy).
 #let apply-base-styles(
@@ -15,22 +16,21 @@
   let links_on = theme.at("links_colored", default: false)
   let faculty_on = theme.at("faculty_colored", default: false)
   let link_color = if not links_on {
-    rgb("#000000")
+    cfg.link.mono-color
   } else if theme.at("link_color", default: none) != none {
     theme.at("link_color")
   } else if faculty_on and theme.at("faculty_color", default: none) != none {
     theme.at("faculty_color")
   } else {
-    rgb("#000000")
+    cfg.link.mono-color
   }
   show link: set text(fill: link_color)
 
   show: codly-init.with()
   codly(languages: codly-languages)
 
+  show: apply-vlna
   if draft != true {
-    show: apply-vlna
-
     // Pravidlo: Při `draft: false` přidá kompenzaci proti vdovám a sirotkům.
     show par: it => {
       let threshold = 10%
@@ -52,13 +52,7 @@
   }
 
   set document(
-    author: author.prefix
-      + " "
-      + author.name
-      + " "
-      + author.surname
-      + " "
-      + author.suffix,
+    author: author.prefix + " " + author.name + " " + author.surname + " " + author.suffix,
     title: thesis.title,
     date: auto,
     description: abstract.czech,
@@ -67,9 +61,9 @@
 
   set text(
     bottom-edge: "bounds",
-    size: 12pt,
+    size: cfg.text.size,
     overhang: true,
-    font: "TeX Gyre Termes",
+    font: cfg.text.font,
     fallback: true,
     hyphenate: true,
     costs: if draft != true {
@@ -79,33 +73,44 @@
     },
   )
 
-  show math.equation: set text(font: "TeX Gyre Termes Math", fallback: true)
-  show raw: set text(font: "TeX Gyre Cursor", fallback: true)
+  show math.equation: set text(font: cfg.text.math-font, fallback: true)
+  show raw: set text(font: cfg.text.raw-font, fallback: true)
 
   set page(
     margin: if draft != true {
-      (inside: 35mm, outside: 25mm, y: 25mm)
+      (inside: cfg.page.margin-inside, outside: cfg.page.margin-outside, y: cfg.page.margin-y)
     } else {
-      (left: 10mm, right: 50mm, top: 10mm, bottom: 10mm)
+      (
+        left: cfg.page.draft.left, right: cfg.page.draft.right,
+        top: cfg.page.draft.top, bottom: cfg.page.draft.bottom,
+      )
     },
     header: none,
     // Vlastní patička číslo skutečně vykresluje; `numbering` jen určuje vzor,
     // který si `centered-page-footer()` přečte z `page.numbering`.
     numbering: "1",
     footer: centered-page-footer(),
-    paper: "a4",
+    paper: cfg.page.paper,
     binding: auto,
   )
 
   set par(
-    first-line-indent: (amount: 7mm, all: true),
+    first-line-indent: (amount: cfg.par.indent, all: false),
     linebreaks: if draft != true { "optimized" } else { "simple" },
-    leading: 1.05em,
+    leading: cfg.par.leading,
     justify: true,
+    justification-limits: (
+      spacing: (
+        min: cfg.par.spacing-min, // default: 66.67%
+        max: cfg.par.spacing-max,
+      ),
+    ),
   )
 
-  set enum(indent: 1em)
-  set list(indent: 1em)
+  set enum(indent: cfg.par.list-indent, spacing: cfg.par.enum-spacing)
+  set list(indent: cfg.par.list-indent, spacing: cfg.par.list-spacing)
+
+  set footnote.entry(indent: 0em)
 
   set math.equation(numbering: (..nums) => {
     // Před první číslovanou kapitolou je čítač 0 — vynutíme alespoň 1.

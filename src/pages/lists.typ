@@ -27,6 +27,8 @@
     }
 
     outline(
+      // Musí odpovídat `supplement: [heading]` v src/styling/headings.typ —
+      // při nesouladu se OBSAH tiše vykreslí PRÁZDNÝ (bez varování).
       target: heading.where(supplement: [heading], outlined: true),
       indent: 1em,
       depth: 3,
@@ -34,7 +36,8 @@
     )
   }
 
-  // Zkratky a pojmy — vykreslí se jen pokud byly v textu použity
+  // Zkratky a pojmy — seznamy vypisují všechny položky z glossary.toml
+  // (glosář je kurátorovaný autorem; viz internal/glossary/registry.typ).
   context if outlines.acronyms != false and has-used-acronyms(glossary.acronyms) {
     frontmatter-heading(t("list_acronyms", lang: lang))
     generate-acronyms-list(glossary.acronyms)

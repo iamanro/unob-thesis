@@ -3,7 +3,9 @@
 
 #import "@preview/ez-today:2.1.0" as ez-today
 
-#import "@preview/vlna:0.1.1": apply-vlna
+// Lokální náhrada balíčku @preview/vlna — viz src/styling/vlna.typ
+// (navíc: dvoupísmenná slova, tituly před/za jménem, zkratky).
+#import "vlna.typ": apply-vlna
 
 #import "@preview/codly:1.3.0": codly, codly-init
 #import "@preview/codly-languages:0.1.10": codly-languages

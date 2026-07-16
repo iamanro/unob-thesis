@@ -1,5 +1,3 @@
-#import "./validate.typ": panic-local
-
 // Jednosegmentové hlavičky tabulek (`[iso]`) obalí do uvozovek (`["iso"]`), aby
 // TOML parser přijal i klíče se znaky, které by jako holý klíč neprošly, a chyba
 // se pak nahlásila srozumitelně až ve validaci. Hlavičky s tečkou se ponechají,
@@ -35,10 +33,9 @@
 
 #let _entry(key, value) = {
   if type(value) != dictionary {
-    panic-local(
-      "Položka glosáře `" + key + "` musí být TOML tabulka.",
-      "Glossary entry `" + key + "` must be a TOML table.",
-    )
+    // Přímý panic — `panic-local` by v hodnotové pozici vrátil content,
+    // který se nevysází, a chyba by se maskovala pozdější typovou chybou.
+    panic("Položka glosáře / glossary entry `" + key + "` musí být TOML tabulka / must be a TOML table.")
   }
 
   (key: key, .._acronym-fields(key, value), glossary: value.at("glossary", default: none))
@@ -46,10 +43,8 @@
 
 #let normalize-glossary-dictionary(document) = {
   if document.at("acronyms", default: none) != none or document.at("terms", default: none) != none or document.at("entries", default: none) != none {
-    panic-local(
-      "Glosář používá jednotný formát: jedna TOML tabulka na položku (`[iso]`, `[llm]`, ...).",
-      "Glossary uses the unified format: one TOML table per entry (`[iso]`, `[llm]`, ...).",
-    )
+    // Přímý panic (viz _entry) — jinak by se hláška spolkla do "cannot join".
+    panic("Glosář používá jednotný formát / glossary uses the unified format: jedna TOML tabulka na položku / one TOML table per entry (`[iso]`, `[llm]`, ...).")
   }
 
   let result = (:)
@@ -70,10 +65,8 @@
   } else if type(input) == str {
     normalize-glossary-dictionary(toml(bytes(normalize-toml-table-headers(input))))
   } else {
-    panic-local(
-      "Nepodporovaný formát glosáře.",
-      "Unsupported glossary format.",
-    )
+    // Přímý panic (viz _entry) — v hodnotové pozici by se hláška spolkla.
+    panic("Nepodporovaný formát glosáře / unsupported glossary format.")
   }
 }
 

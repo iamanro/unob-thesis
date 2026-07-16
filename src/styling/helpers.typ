@@ -4,12 +4,12 @@
   counter(page).display(if numbering == auto { page.numbering } else { numbering })
 }
 
-/// Pravidlo pro podnadpisy (úroveň 2–4): tučný blok dané velikosti.
-#let subheading-rule(size) = it => block(width: 100%)[
+/// Pravidlo pro podnadpisy (úroveň 2–4): tučný blok dané velikosti a mezery.
+#let subheading-rule(size, gap) = it => block(width: 100%)[
   #set text(size: size, weight: "bold")
-  #v(.5em)
+  #v(gap)
   #it
-  #v(.5em)
+  #v(gap)
 ]
 
 /// Vynuluje čítače lokální pro kapitolu/přílohu.

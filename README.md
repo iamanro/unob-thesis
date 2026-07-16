@@ -10,7 +10,7 @@ Oficiální šablona pro psaní bakalářských, diplomových a disertačních p
 
 ### 1. Stažení šablony
 
-Šablona je připravená k úpravě — píšeš rovnou v souboru `main.typ`. Pro lokální práci je vhodné nainstalovat [Typst](https://typst.app/open-source/) a rozšíření **Tinymist** (viz Varianta A níže); přes Typst Web App v prohlížeči instalovat nemusíš nic. Stáhni si šablonu jedním ze dvou způsobů:
+Šablona je připravená k okamžité úpravě — nic se neinstaluje, píšeš rovnou v souboru `main.typ`. Stáhni si ji jedním ze dvou způsobů:
 
 **Přes Git:**
 
@@ -238,6 +238,19 @@ task fonts          # seznam fontů
 task clean          # úklid build/
 ```
 
+### Vzhled a typografie (`src/config.toml`)
+
+Veškeré laditelné hodnoty sazby jsou na jednom místě v [`src/config.toml`](src/config.toml) — velikosti nadpisů (H1–H4), písma (text, matematika, kód), řádkování a odsazení odstavce, okraje stránky, sazba tabulek, titulní strana a barvy fakult. Styly v `src/styling/*` je čtou přes `src/config.typ`, takže úprava vzhledu nevyžaduje zásah do Typst kódu.
+
+Délky se zapisují jako řetězec s jednotkou (`"12pt"`, `"0.7em"`, `"35mm"`, `"47%"`; jednotky `pt`, `mm`, `cm`, `in`, `em`, `%`). Například zvětšení nadpisů kapitol:
+
+```toml
+[heading]
+h1_size = "16pt"
+```
+
+Sekce `[faculty]` obsahuje oficiální barvy fakult — neměň je bez svolení Univerzity obrany (viz `NOTICE`).
+
 ### Doporučené doplňkové balíčky
 
 Šablona záměrně neexportuje vlastní boxy, callout bloky ani kreslicí nástroje. Pokud potřebuješ víc, použij balíčky z Typst Universe a importuj je přímo v práci (ne v jádru šablony): `@preview/showybox`, `@preview/frame-it`, `@preview/cetz`, `@preview/fletcher`, `@preview/physica`, `@preview/zero`, `@preview/subpar`.
@@ -269,7 +282,7 @@ Official Typst template for writing bachelor's, master's, and doctoral theses at
 
 ### 1. Download the template
 
-The template is ready to edit — you write directly in `main.typ`. For local work it is best to install [Typst](https://typst.app/open-source/) and the **Tinymist** extension (see Option A below); with the Typst web app in the browser you don't need to install anything. Get the template in one of two ways:
+The template is ready to edit right away — nothing to install, you write directly in `main.typ`. Get it in one of two ways:
 
 **With Git:**
 

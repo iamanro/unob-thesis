@@ -1,6 +1,7 @@
 #import "internal/i18n/index.typ": normalize-thesis-type as i18n-normalize-thesis-type, setup-language
 #import "../styling/styles.typ": apply-base-styles, apply-figure-styles, apply-heading-styles
 #import "../styling/theme.typ": resolve-theme
+#import "../styling/flex-caption.typ": apply-flex-caption-outline
 #import "appendix.typ": appendix as render-appendix
 #import "render.typ": render-draft-layout, render-final-layout
 #import "internal/validation.typ": validate-config, validate-submit-check
@@ -32,7 +33,7 @@
   assignment_front: none,
   assignment_back: none,
   acknowledgement: false,
-  declaration: true,
+   declaration: true,
   ai_used: false,
   acronyms: false,
   terms: false,
@@ -160,6 +161,8 @@
   show: apply-heading-styles.with(draft: draft)
   show: apply-figure-styles
   show: glossary-show
+  // Přepínání dlouhá/krátká verze popisků (flex-caption) i v šablonových seznamech.
+  show: apply-flex-caption-outline
 
   [#metadata(draft) <unob-layout-draft>]
   init-glossary-runtime(resolved_acronyms, terms: resolved_terms)

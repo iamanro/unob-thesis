@@ -1,5 +1,5 @@
 #import "./validate.typ": panic-local
-#import "./registry.typ": acronym-label-prefix
+#import "./registry.typ": acronym-label-prefix, term-label-prefix
 
 #let get-dictionary-keys(definitions) = {
   let keys = (:)
@@ -73,16 +73,12 @@
   }
 }
 
-#let resolve-known-key(kind_cs, kind_en, raw_key, definitions, unknown_cs: "Neznámý", unknown_en: "Unknown") = {
-  let key = str(raw_key)
-  let resolved = find-key-or-short-case-insensitive(key, definitions)
-  if resolved == none {
-    panic-unknown-key(kind_cs, kind_en, key, definitions, unknown_cs: unknown_cs, unknown_en: unknown_en)
-  }
-  resolved
-}
-
 #let link-to-acronym-entry(key, text) = context {
   let target = label(acronym-label-prefix + str(key))
+  if query(selector(target)).len() > 0 { link(target, text) } else { text }
+}
+
+#let link-to-term-entry(key, text) = context {
+  let target = label(term-label-prefix + str(key))
   if query(selector(target)).len() > 0 { link(target, text) } else { text }
 }

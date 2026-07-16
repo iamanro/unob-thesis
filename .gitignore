@@ -19,7 +19,3 @@ __pycache__/
 
 # Lokální zdrojové podklady (nepatří do repozitáře)
 zdroje.txt
-
-# Lokální systemd unity (NFS automount – nepatří do repozitáře)
-mnt-storage.automount
-mnt-storage.mount

@@ -1,15 +1,17 @@
-// Data: Vizuální metadata fakult.
-#let faculty-theme = (
-  fvl: (color: rgb("#808205"), logo: "../assets/logoFVL.svg"),
-  fvt: (color: rgb("#6188cd"), logo: "../assets/logoFVT.svg"),
-  vlf: (color: rgb("#ea0738"), logo: "../assets/logoVLF.svg"),
-  uo:  (color: rgb("#fec820"), logo: "../assets/logoUO.svg"),
+#import "../config.typ": cfg
+
+// Data: Cesty k logům fakult. Barvy fakult jsou v config.toml ([faculty]).
+#let faculty-logos = (
+  fvl: "../assets/logoFVL.svg",
+  fvt: "../assets/logoFVT.svg",
+  vlf: "../assets/logoVLF.svg",
+  uo:  "../assets/logoUO.svg",
 )
 
 // Funkce: get-faculty-color
-// Co: Vrátí barvu fakulty podle zkratky.
+// Co: Vrátí barvu fakulty podle zkratky (z config.toml).
 #let get-faculty-color(faculty) = {
-  faculty-theme.at(faculty, default: (color: rgb("#000000"))).color
+  cfg.faculty.at(faculty, default: rgb("#000000"))
 }
 
 // Funkce: resolve-theme-color
@@ -36,5 +38,5 @@
 // Funkce: get-logo-path
 // Co: Sestaví cestu k logu fakulty pro `src/pages/cover.typ`.
 #let get-logo-path(faculty) = {
-  faculty-theme.at(faculty, default: (logo: "../assets/logo" + upper(faculty) + ".svg")).logo
+  faculty-logos.at(faculty, default: "../assets/logo" + upper(faculty) + ".svg")
 }

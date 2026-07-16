@@ -44,10 +44,8 @@
         [
           nástroje umělé inteligence. Tyto nástroje byly využity v souladu s platnými obecně závaznými právními předpisy, vnitřními předpisy
           Univerzity obrany#if university.faculty != "uo" [ a #text(lang: "cs")[#get-faculty-name(university.faculty, variant: 2, lang: "cs")]]
-          a etickými normami. Veškeré výsledky, které byly generovány nebo
-          ovlivněny nástroji umělé inteligence, jsou v této práci
-          identifikovány, popsány a podloženy relevantními informacemi o
-          použitých algoritmech, tréninkových datech a metodologii.
+          a etickými normami. Sloužily výhradně jako podpůrný nástroj při jazykových, stylistických a formálních úpravách textu, při diskusi nad formulacemi jednotlivých pasáží a při upřesňování či ověřování psychologických a neurovědních pojmů a konceptů. Odborný obsah, analytické interpretace, teoretická konceptualizace i závěry práce jsou výsledkem vlastní vědecké činnosti, za niž nese plnou odpovědnost autorka.
+
         ]
       } else {
         _gendered(author.sex, [nepoužil], [nepoužila])

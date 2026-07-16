@@ -10,7 +10,7 @@ Tento průvodce je součástí ukázkového projektu. Vypnete jej parametrem `gu
 Veškerá konfigurace je přímo v souboru `template/main.typ`, podobně jako u šablony SHAW/ZHAW:
 
 ```typ
-#import "@preview/unob-thesis:0.2.0": *
+#import "@preview/unob-thesis:0.3.0": *
 
 #show: unob-thesis.with(
   lang: "cs",

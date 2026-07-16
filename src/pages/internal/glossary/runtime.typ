@@ -1,19 +1,34 @@
-#import "../../../styling/vendor/glossarium/glossarium.typ": make-glossary, gls, glspl
-#import "../../../styling/vendor/glossarium/themes/default.typ": is-first as is_first_ref
-#import "./validate.typ": panic-local
+// BEZSTAVOVÝ runtime glosáře.
+//
+// Dřívější implementace stavěla na balíčku glossarium: každé `#trm` volalo
+// `gls()`, které inkrementovalo state `__glossary_counts`, a seznamy ve
+// frontmatteru filtrovaly položky přes `count-refs` (čtení `.final()` stavu).
+// Obsah seznamů tak závisel na stavu čítačů, který se měnil mezi iteracemi
+// sazby (poznámky pod čarou a plovoucí prvky mění pořadí zápisů stavu podle
+// stránkování) → dokument nekonvergoval ("document did not converge").
+//
+// Nový návrh je čistě funkční: `#trm` je pouze vyhledání záznamu + odkaz na
+// návěští v SEZNAMU ZKRATEK / SEZNAMU POJMŮ. Jediné čtení stavu je registr
+// definic (zapsán PRÁVĚ JEDNOU při inicializaci šablony, nikdy se nemění),
+// jediný dotaz je existence návěští (množina návěští je za běhu konstantní).
+// Nic zde nezávisí na stránkování → systém nemůže rozbít konvergenci.
 #import "./parse.typ": acronym-fields-from-value
 #import "./registry.typ": acronyms-registry, registry-definitions, terms-registry
-#import "./lookup.typ": find-key-or-short-case-insensitive, link-to-acronym-entry, panic-unknown-key, resolve-known-key
+#import "./lookup.typ": find-key-or-short-case-insensitive, link-to-acronym-entry, link-to-term-entry, panic-unknown-key
 #import "./declension.typ": build-acronym-first-display
 
-#let glossary-show = make-glossary
-#let is-first = is_first_ref
+// Dříve `make-glossary` z glossaria (show pravidla pro jeho interní figury).
+// Bezstavová verze žádná show pravidla nepotřebuje — identita kvůli API.
+#let glossary-show(body) = body
 
 #let singular = "singular"
 #let plural = "plural"
 #let first = "first"
 #let first-plural = "first_plural"
 
+// Pozn.: validace panikuje PŘÍMO (`panic(...)`), ne přes `panic-local` —
+// `panic-local` vrací context-content, který by se v hodnotové pozici
+// (přiřazení do proměnné) nikdy nevysázel, a chyba by se tiše spolkla.
 #let normalize-trm-style(style) = {
   // Konstanty mají stejnou hodnotu jako svůj řetězec (singular == "singular" …),
   // takže stačí porovnat s konstantou; navíc povolíme aliasy "default" a kebab tvar.
@@ -26,9 +41,9 @@
   } else if style == first-plural or style == "first-plural" {
     first-plural
   } else {
-    panic-local(
-      "Neznámý styl `" + str(style) + "`. Použijte `singular`, `plural`, `first` nebo `first_plural`.",
-      "Unknown style `" + str(style) + "`. Use `singular`, `plural`, `first`, or `first_plural`.",
+    panic(
+      "Neznámý styl / unknown style `" + str(style)
+        + "`. Použijte / use `singular`, `plural`, `first`, `first_plural`.",
     )
   }
 }
@@ -37,50 +52,30 @@
   if type(case) == int and case >= 1 and case <= 7 {
     case
   } else {
-    panic-local(
-      "Neznámý pád `" + str(case) + "`. Použijte číslo 1 až 7.",
-      "Unknown case `" + str(case) + "`. Use numbers 1 to 7.",
-    )
+    panic("Neznámý pád / unknown case `" + str(case) + "`. Použijte číslo / use numbers 1-7.")
   }
 }
 
-#let acronym(short, force-first: false, grammatical_case: 1) = context {
-  let definitions = registry-definitions(acronyms-registry)
-  let key = resolve-known-key("zkratka", "acronym", short, definitions, unknown_cs: "Neznámá", unknown_en: "Unknown")
-  let fields = acronym-fields-from-value(key, definitions.at(key))
-  let short_form = str(fields.at("short", default: key))
-  let display = build-acronym-first-display(fields, short_form, grammatical_case: grammatical_case)
-  let rendered = if force-first or is-first(key) { gls(key, display: display, link: false) } else { gls(key, first: false, link: false) }
-  link-to-acronym-entry(key, rendered)
-}
-
-#let acronym-plural(short, force-first: false, grammatical_case: 1) = context {
-  let definitions = registry-definitions(acronyms-registry)
-  let key = resolve-known-key("zkratka", "acronym", short, definitions, unknown_cs: "Neznámá", unknown_en: "Unknown")
-  let fields = acronym-fields-from-value(key, definitions.at(key))
-  let short_form = str(fields.at("short", default: key))
-  // `plural` je v záznamu vždy přítomné (často `none`) — `.at(default:)` proto
-  // nestačí, je nutné ošetřit `none` explicitně.
+// Čistý výběr zobrazovaného tvaru zkratky podle stylu (bez jakéhokoli stavu).
+// `first`/`first_plural` vysází plný tvar „český (anglický - ZKRATKA)" —
+// v textu se běžně nepoužívá (zavedení jsou psána ručně kvůli skloňování),
+// ale zůstává jako explicitní API pro `style:`/`force:`.
+#let acronym-display(fields, style, case) = {
+  let short = str(fields.at("short", default: ""))
   let plural_field = fields.at("plural", default: none)
-  let short_plural = if plural_field == none { short_form } else { str(plural_field) }
-  let display = build-acronym-first-display(fields, short_plural, grammatical_case: grammatical_case, plural_form: true)
-  let rendered = if force-first or is-first(key) { glspl(key, display: display, link: false) } else { glspl(key, first: false, link: false) }
-  link-to-acronym-entry(key, rendered)
+  let short_plural = if plural_field == none { short } else { str(plural_field) }
+  if style == first {
+    build-acronym-first-display(fields, short, grammatical_case: case)
+  } else if style == first-plural {
+    build-acronym-first-display(fields, short_plural, grammatical_case: case, plural_form: true)
+  } else if style == plural {
+    short_plural
+  } else {
+    short
+  }
 }
 
-#let term(key, force-first: false) = context {
-  let definitions = registry-definitions(terms-registry)
-  let term_key = resolve-known-key("pojem", "term", key, definitions)
-  if force-first { gls(term_key, first: true, link: false) } else { gls(term_key, link: false) }
-}
-
-#let term-plural(key, force-first: false) = context {
-  let definitions = registry-definitions(terms-registry)
-  let term_key = resolve-known-key("pojem", "term", key, definitions)
-  if force-first { glspl(term_key, first: true, link: false) } else { glspl(term_key, link: false) }
-}
-
-#let trm(key, style: singular, case: 1, force: none) = context {
+#let trm(key, style: singular, case: 1, force: none, display: none) = context {
   let requested_key = str(key)
   let resolved_style = normalize-trm-style(style)
   let resolved_case = normalize-trm-case(case)
@@ -95,15 +90,20 @@
   let term_key = find-key-or-short-case-insensitive(requested_key, terms)
 
   if acronym_key != none {
-    if effective_style == plural { acronym-plural(acronym_key, grammatical_case: resolved_case) }
-    else if effective_style == first { acronym(acronym_key, force-first: true, grammatical_case: resolved_case) }
-    else if effective_style == first-plural { acronym-plural(acronym_key, force-first: true, grammatical_case: resolved_case) }
-    else { acronym(acronym_key, grammatical_case: resolved_case) }
+    // `display` zachová povrchový (skloňovaný) tvar z textu a jen ho prolinkuje.
+    let body = if display != none { display } else {
+      let fields = acronym-fields-from-value(acronym_key, acronyms.at(acronym_key))
+      acronym-display(fields, effective_style, resolved_case)
+    }
+    link-to-acronym-entry(acronym_key, body)
   } else if term_key != none {
-    if effective_style == plural { term-plural(term_key) }
-    else if effective_style == first { term(term_key, force-first: true) }
-    else if effective_style == first-plural { term-plural(term_key, force-first: true) }
-    else { term(term_key) }
+    // Pojem se v textu zobrazuje svým názvem (`short`), případně přes `display`
+    // povrchovým tvarem — nutné pro víceslovné/skloňované pojmy.
+    let body = if display != none { display } else {
+      let value = terms.at(term_key)
+      if type(value) == dictionary { str(value.at("short", default: term_key)) } else { str(term_key) }
+    }
+    link-to-term-entry(term_key, body)
   } else {
     let merged = (:)
     for (candidate, value) in acronyms { merged.insert(str(candidate), value) }

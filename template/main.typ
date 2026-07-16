@@ -1,4 +1,4 @@
-#import "@preview/unob-thesis:0.2.0": *
+#import "@preview/unob-thesis:0.3.0": *
 
 // Glosář (zkratky a pojmy) se načítá z vašeho souboru glossary.toml.
 // `toml("glossary.toml")` čte soubor vedle tohoto main.typ.

@@ -1,3 +1,5 @@
+#import "../config.typ": cfg
+
 /// Nastaví vzhled popisků a číslování obrázků, tabulek a rovnic.
 #let apply-figure-styles(body) = {
   set figure(numbering: n => numbering(
@@ -8,29 +10,48 @@
   ))
 
   set figure.caption(separator: " ")
-  for kind in (table, raw, math.equation) {
-    show figure.where(kind: kind): set figure.caption(position: top, separator: [])
-  }
+  // Pozn.: `show` uvnitř `for` smyčky platí jen pro (prázdný) zbytek dané
+  // iterace, takže se nikdy neprojeví mimo smyčku — proto tři pravidla zvlášť.
+  show figure.where(kind: table): set figure.caption(position: top, separator: [])
+  show figure.where(kind: raw): set figure.caption(position: top, separator: [])
+  show figure.where(kind: math.equation): set figure.caption(position: top, separator: [])
 
-  set table(stroke: 0.7pt)
-  set table.hline(stroke: .5pt)
+  // Dlouhé tabulky se zalamují přes strany; `table.header` v obsahu se pak
+  // automaticky opakuje na každé další straně. (Obal `block(breakable: true)`
+  // níže nestačí — zalomitelný musí být vlastní blok figury.)
+  show figure.where(kind: table): set block(breakable: true)
+
+  // Knižní styl (booktabs): bez svislých čar a mřížky; silnější linka nahoře
+  // a dole (kreslí ji obalový blok), tenčí `table.hline()` pod hlavičkou.
+  set table(stroke: none, inset: (x: cfg.table.inset-x, y: cfg.table.inset-y))
+  set table.hline(stroke: cfg.table.rule-inner)
+  show table: it => block(
+    stroke: (top: cfg.table.rule-outer, bottom: cfg.table.rule-outer),
+    inset: 0pt,
+    breakable: true,
+    it,
+  )
   show table.cell.where(y: 0): strong
-  show table: set text(size: 10pt, hyphenate: true)
-  show table: set par(justify: true)
+  show table: set text(size: cfg.table.size, hyphenate: false)
+  show table: set par(justify: false, first-line-indent: 0mm)
 
   show figure.caption: it => [
-    #v(1em)
+    #v(cfg.table.caption-gap)
     #it.supplement #it.counter.display(it.numbering)~#it.body
-    #v(1em)
+    #v(cfg.table.caption-gap)
   ]
 
-  let figure_spacing = 1em
+  // Figury (tabulky) se sázejí HNED po textu — menší svislá mezera než mezi
+  // odstavci (1,2em), žádné vnitřní odsazení. BEZ `sticky`: dřívější
+  // `sticky: it.kind == table` lepilo tabulku k následujícímu obsahu, takže
+  // když se nevešla na konec strany, odsunula se celá na další stranu a nad
+  // ní zůstalo volné místo. `breakable: true` zajistí, že se dlouhá tabulka
+  // místo odsunutí normálně rozlomí přes strany.
   show figure: it => {
     let content = block(
       width: 100%,
       breakable: true,
-      spacing: 1.2em,
-      inset: (y: figure_spacing),
+      spacing: cfg.figure.spacing,
       align(center, it),
     )
     if it.placement == none {
@@ -40,11 +61,7 @@
     }
   }
 
-  show math.equation.where(block: true): it => {
-    v(.5em)
-    it
-    v(.5em)
-  }
+  show math.equation.where(block: true): set block(spacing: cfg.figure.spacing)
 
   body
 }
